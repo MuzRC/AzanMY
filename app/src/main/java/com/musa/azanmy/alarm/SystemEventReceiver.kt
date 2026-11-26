@@ -14,7 +14,7 @@ class SystemEventReceiver : BroadcastReceiver() {
         Intent.ACTION_BOOT_COMPLETED,
         Intent.ACTION_LOCKED_BOOT_COMPLETED,
         Intent.ACTION_MY_PACKAGE_REPLACED,
-        Intent.ACTION_TIME_SET,
+        Intent.ACTION_TIME_CHANGED,
         Intent.ACTION_TIMEZONE_CHANGED,
         AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED
     )

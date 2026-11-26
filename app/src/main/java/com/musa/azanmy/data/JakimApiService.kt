@@ -134,7 +134,7 @@ object JakimApiService {
 
     private fun normalizeDateToIso(rawDate: String): String {
         return try {
-            if (rawDate.matches(Regex("\d{4}-\d{2}-\d{2}"))) {
+            if (rawDate.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
                 rawDate
             } else {
                 LocalDate.parse(rawDate.trim(), jakimDateInputFormat).toString()
