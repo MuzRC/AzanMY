@@ -15,35 +15,46 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.musa.azanmy.data.ThemePreference
 
-val MidnightEmerald = Color(0xFF061411)
-val DeepPine = Color(0xFF0D241F)
-val CardEmerald = Color(0xFF123029)
-val ElevatedEmerald = Color(0xFF183D34)
+val MidnightEmerald = Color(0xFF051310)
+val DeepPine = Color(0xFF0B221D)
+val CardEmerald = Color(0xFF102E27)
+val ElevatedEmerald = Color(0xFF173E35)
 
 val WarmGold = Color(0xFFD4AF37)
 val BrightGold = Color(0xFFE6C252)
+val PaleGoldHighlight = Color(0xFFFFF0B8)
+val DeepBronzeGold = Color(0xFF7A5610)
 val SoftGoldContainer = Color(0x33D4AF37)
 
-val OffWhiteText = Color(0xFFF5F7F6)
-val MutedMintText = Color(0xFFA3C4BC)
-val SubtleMintBorder = Color(0xFF214A40)
+val OffWhiteText = Color(0xFFF6F8F7)
+val MutedMintText = Color(0xFFA8C9C1)
+val SubtleMintBorder = Color(0xFF28584C)
 
 val WarmIvory = Color(0xFFFBF9F5)
 val LightCardSurface = Color(0xFFFFFFFF)
 val LightEmeraldPrimary = Color(0xFF0B4F3E)
 val LightEmeraldDarkText = Color(0xFF0A2E25)
 val LightMutedText = Color(0xFF4A6B62)
-val LightBorder = Color(0xFFD8E2DF)
+val LightBorder = Color(0xFFD2DFDB)
 
 @Immutable
 data class ExtendedAzanColors(
+    val isDark: Boolean,
     val goldAccent: Color,
     val goldBright: Color,
+    val goldHighlight: Color,
+    val goldDeep: Color,
     val goldContainer: Color,
     val cardBackground: Color,
+    val cardGradientTop: Color,
+    val cardGradientBottom: Color,
     val cardBorder: Color,
+    val cardRimTop: Color,
+    val cardRimBottom: Color,
     val heroStart: Color,
     val heroEnd: Color,
+    val screenGlowTop: Color,
+    val screenGlowBottom: Color,
     val subtleText: Color,
     val statusOk: Color,
     val statusWarn: Color
@@ -51,13 +62,22 @@ data class ExtendedAzanColors(
 
 val LocalExtendedColors = staticCompositionLocalOf {
     ExtendedAzanColors(
+        isDark = true,
         goldAccent = WarmGold,
         goldBright = BrightGold,
+        goldHighlight = PaleGoldHighlight,
+        goldDeep = DeepBronzeGold,
         goldContainer = SoftGoldContainer,
         cardBackground = CardEmerald,
+        cardGradientTop = Color(0xFF163C33),
+        cardGradientBottom = Color(0xFF0B221D),
         cardBorder = SubtleMintBorder,
-        heroStart = Color(0xFF10352C),
+        cardRimTop = Color(0xFF74B8A7),
+        cardRimBottom = Color(0xFF234E43),
+        heroStart = Color(0xFF143E34),
         heroEnd = Color(0xFF071915),
+        screenGlowTop = Color(0xFF13483C),
+        screenGlowBottom = Color(0xFF04100D),
         subtleText = MutedMintText,
         statusOk = Color(0xFF4ADE80),
         statusWarn = Color(0xFFFBBF24)
@@ -118,26 +138,44 @@ fun AzanMYTheme(
     val colorScheme = if (isDark) DarkAzanColorScheme else LightAzanColorScheme
     val extendedColors = if (isDark) {
         ExtendedAzanColors(
+            isDark = true,
             goldAccent = WarmGold,
             goldBright = BrightGold,
+            goldHighlight = PaleGoldHighlight,
+            goldDeep = DeepBronzeGold,
             goldContainer = SoftGoldContainer,
             cardBackground = CardEmerald,
+            cardGradientTop = Color(0xFF163D34),
+            cardGradientBottom = Color(0xFF0A211C),
             cardBorder = SubtleMintBorder,
-            heroStart = Color(0xFF11382F),
-            heroEnd = Color(0xFF071814),
+            cardRimTop = Color(0xFF79BDA9),
+            cardRimBottom = Color(0xFF214A40),
+            heroStart = Color(0xFF154137),
+            heroEnd = Color(0xFF071A16),
+            screenGlowTop = Color(0xFF144C40),
+            screenGlowBottom = Color(0xFF04100D),
             subtleText = MutedMintText,
             statusOk = Color(0xFF4ADE80),
             statusWarn = Color(0xFFFBBF24)
         )
     } else {
         ExtendedAzanColors(
+            isDark = false,
             goldAccent = Color(0xFFB3871B),
             goldBright = Color(0xFF9A7210),
+            goldHighlight = Color(0xFFFFE082),
+            goldDeep = Color(0xFF6E4E0A),
             goldContainer = Color(0x26D4AF37),
             cardBackground = LightCardSurface,
+            cardGradientTop = Color(0xFFFFFFFF),
+            cardGradientBottom = Color(0xFFF3F7F5),
             cardBorder = LightBorder,
-            heroStart = Color(0xFF0D4A3B),
+            cardRimTop = Color(0xFFD4AF37),
+            cardRimBottom = Color(0xFFC5D6D1),
+            heroStart = Color(0xFF0E4F3F),
             heroEnd = Color(0xFF062920),
+            screenGlowTop = Color(0xFFE7F2EE),
+            screenGlowBottom = WarmIvory,
             subtleText = LightMutedText,
             statusOk = Color(0xFF15803D),
             statusWarn = Color(0xFFB45309)

@@ -1,27 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="120dp"
-    android:height="120dp"
-    android:viewportWidth="120"
-    android:viewportHeight="120">
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
 
-    <!-- Corak Rub el Hizb Lutsinar untuk Kad Utama -->
+    <!-- Mandala Geometri Islamik Berpusat (Rosette & Bintang 16 Bucu) -->
+    <!-- Bulatan Luar Halus -->
     <path
         android:fillColor="#00000000"
-        android:pathData="M25,25 L95,25 L95,95 L25,95 Z"
-        android:strokeAlpha="0.08"
-        android:strokeColor="#FFD4AF37"
-        android:strokeWidth="1.2" />
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M60,10.5 L109.5,60 L60,109.5 L10.5,60 Z"
-        android:strokeAlpha="0.08"
-        android:strokeColor="#FFD4AF37"
-        android:strokeWidth="1.2" />
-    <path
-        android:fillColor="#00000000"
-        android:pathData="M60,36 A24,24 0 1,1 59.99,36 Z"
-        android:strokeAlpha="0.06"
-        android:strokeColor="#FFD4AF37"
+        android:pathData="M120,12 A108,108 0 1,1 119.99,12 Z"
+        android:strokeAlpha="0.11"
+        android:strokeColor="#FFE6C252"
         android:strokeWidth="1.0" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,26 A94,94 0 1,1 119.99,26 Z"
+        android:strokeAlpha="0.14"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
+
+    <!-- Bintang 8 Bucu Utama (Rub el Hizb Besar) -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,54 L186,54 L186,186 L54,186 Z"
+        android:strokeAlpha="0.14"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,26.7 L213.3,120 L120,213.3 L26.7,120 Z"
+        android:strokeAlpha="0.14"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
+
+    <!-- Bintang Putaran 22.5 Darjah (16 Bucu) -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,34 L153,41 L181,59 L199,87 L206,120 L199,153 L181,181 L153,199 L120,206 L87,199 L59,181 L41,153 L34,120 L41,87 L59,59 L87,41 Z"
+        android:strokeAlpha="0.10"
+        android:strokeColor="#FFA3C4BC"
+        android:strokeWidth="1.0" />
+
+    <!-- Kelopak Rosette Tengah -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,46 Q142,82 194,120 Q142,158 120,194 Q98,158 46,120 Q98,82 120,46 Z"
+        android:strokeAlpha="0.15"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M67.7,67.7 Q110,78 172.3,67.7 Q162,110 172.3,172.3 Q130,162 67.7,172.3 Q78,130 67.7,67.7 Z"
+        android:strokeAlpha="0.15"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
+
+    <!-- Lingkaran Teras Tengah -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,76 A44,44 0 1,1 119.99,76 Z"
+        android:strokeAlpha="0.14"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.0" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M120,96 A24,24 0 1,1 119.99,96 Z"
+        android:strokeAlpha="0.16"
+        android:strokeColor="#FFE6C252"
+        android:strokeWidth="1.1" />
 </vector>

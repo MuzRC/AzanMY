@@ -3,6 +3,7 @@ package com.musa.azanmy.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,10 +47,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -103,101 +110,192 @@ fun HomeScreen(
         }
     }
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding(),
-        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        ext.screenGlowTop,
+                        MaterialTheme.colorScheme.background,
+                        ext.screenGlowBottom
+                    )
+                )
+            )
     ) {
-        // Baris Atas: Jenama & Pemilih Zon
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(ext.goldContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+            contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Baris Atas: Lencana Masjid Emas + Tajuk Metallic Gold & Pemilih Zon
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .shadow(6.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(Color(0xFF184B3F), Color(0xFF081C17))
+                                    )
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            PaleGoldHighlight,
+                                            WarmGold,
+                                            DeepBronzeGold
+                                        )
+                                    ),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                                contentDescription = "Logo AzanMY",
+                                modifier = Modifier.size(40.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "AzanMY",
+                            style = TextStyle(
+                                fontSize = 23.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                brush = if (ext.isDark) {
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            PaleGoldHighlight,
+                                            BrightGold,
+                                            Color(0xFFB38620)
+                                        )
+                                    )
+                                } else {
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color(0xFF0E5A47),
+                                            Color(0xFF073328)
+                                        )
+                                    )
+                                },
+                                shadow = Shadow(
+                                    color = Color.Black.copy(alpha = 0.45f),
+                                    offset = Offset(0f, 2f),
+                                    blurRadius = 4f
+                                )
+                            )
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "AzanMY",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
 
-                Surface(
-                    onClick = onOpenZonePicker,
-                    shape = RoundedCornerShape(20.dp),
-                    color = ext.cardBackground,
-                    border = BorderStroke(1.dp, ext.cardBorder)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Pil Pemilih Zon Berbingkai Emas
+                    Box(
+                        modifier = Modifier
+                            .shadow(6.dp, RoundedCornerShape(22.dp))
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(ext.cardGradientTop, ext.cardGradientBottom)
+                                )
+                            )
+                            .border(
+                                width = 1.2.dp,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        ext.goldBright.copy(alpha = 0.85f),
+                                        ext.cardRimBottom
+                                    )
+                                ),
+                                shape = RoundedCornerShape(22.dp)
+                            )
+                            .clickable(onClick = onOpenZonePicker)
+                            .padding(horizontal = 13.dp, vertical = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.LocationOn,
-                            contentDescription = null,
-                            tint = ext.goldBright,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = zone.shortTitle,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Icon(
-                            imageVector = Icons.Rounded.KeyboardArrowDown,
-                            contentDescription = null,
-                            tint = ext.subtleText,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.LocationOn,
+                                contentDescription = null,
+                                tint = ext.goldBright,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = zone.shortTitle,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = ext.subtleText,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        // Kad Utama Hero Countdown
-        item {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                border = BorderStroke(1.dp, WarmGold.copy(alpha = 0.55f)),
-                color = Color.Transparent
-            ) {
+            // Kad Utama Hero Countdown dengan Mandala Islamik & Cahaya Keemasan
+            item {
+                val heroShape = RoundedCornerShape(24.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .shadow(12.dp, heroShape)
+                        .clip(heroShape)
                         .background(
-                            Brush.linearGradient(
+                            Brush.verticalGradient(
                                 colors = listOf(ext.heroStart, ext.heroEnd)
                             )
                         )
+                        .border(
+                            width = 1.5.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    PaleGoldHighlight.copy(alpha = 0.85f),
+                                    WarmGold.copy(alpha = 0.70f),
+                                    DeepBronzeGold.copy(alpha = 0.55f)
+                                )
+                            ),
+                            shape = heroShape
+                        )
                 ) {
+                    // Corak Mandala Geometri Islamik di Latar Belakang Kad
                     Image(
                         painter = painterResource(id = R.drawable.bg_islamic_pattern),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.matchParentSize()
+                    )
+
+                    // Pancaran Cahaya Emas Halus di Puncak Atas Kad
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(90.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        WarmGold.copy(alpha = 0.22f),
+                                        Color.Transparent
+                                    ),
+                                    radius = 420f
+                                )
+                            )
                     )
 
                     Column(
@@ -236,7 +334,7 @@ fun HomeScreen(
                                 color = MutedMintText,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = 1.1.sp
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -248,33 +346,82 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     text = nextPrayer.prayer.displayName,
-                                    color = OffWhiteText,
-                                    fontSize = 32.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = TextStyle(
+                                        color = OffWhiteText,
+                                        fontSize = 33.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        shadow = Shadow(
+                                            color = Color.Black.copy(alpha = 0.45f),
+                                            offset = Offset(0f, 2f),
+                                            blurRadius = 6f
+                                        )
+                                    )
                                 )
                                 Text(
                                     text = nextPrayer.time12,
-                                    color = BrightGold,
-                                    fontSize = 26.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = TextStyle(
+                                        fontSize = 27.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(
+                                                PaleGoldHighlight,
+                                                BrightGold,
+                                                Color(0xFFC59626)
+                                            )
+                                        ),
+                                        shadow = Shadow(
+                                            color = Color.Black.copy(alpha = 0.45f),
+                                            offset = Offset(0f, 2f),
+                                            blurRadius = 6f
+                                        )
+                                    )
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             val remainingMs = (nextPrayer.triggerMillis - nowMillis).coerceAtLeast(0L)
                             val countdownText = formatCountdown(remainingMs)
+                            val pillShape = RoundedCornerShape(14.dp)
 
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = Color(0x26D4AF37)
+                            // Pil Kiraan Detik Emas 3D Berkilat
+                            Box(
+                                modifier = Modifier
+                                    .shadow(6.dp, pillShape)
+                                    .clip(pillShape)
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(
+                                                Color(0xFFD9A738),
+                                                Color(0xFF9C6D14),
+                                                Color(0xFF6B480A)
+                                            )
+                                        )
+                                    )
+                                    .border(
+                                        width = 1.2.dp,
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(
+                                                PaleGoldHighlight,
+                                                Color(0xFF8C6212)
+                                            )
+                                        ),
+                                        shape = pillShape
+                                    )
+                                    .padding(horizontal = 15.dp, vertical = 7.dp)
                             ) {
                                 Text(
                                     text = "Berbaki $countdownText",
-                                    color = BrightGold,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                    style = TextStyle(
+                                        color = Color(0xFFFFFBEB),
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        shadow = Shadow(
+                                            color = Color.Black.copy(alpha = 0.55f),
+                                            offset = Offset(0f, 1f),
+                                            blurRadius = 3f
+                                        )
+                                    )
                                 )
                             }
                         } else {
@@ -322,61 +469,74 @@ fun HomeScreen(
                     }
                 }
             }
-        }
 
-        // Info Syuruk Ringkas
-        if (todayTimes != null) {
-            item {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = ext.cardBackground,
-                    border = BorderStroke(1.dp, ext.cardBorder)
-                ) {
-                    Row(
+            // Info Syuruk Ringkas dengan Bingkai Kaca
+            if (todayTimes != null) {
+                item {
+                    val syurukShape = RoundedCornerShape(14.dp)
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.WbTwilight,
-                                contentDescription = null,
-                                tint = ext.goldAccent,
-                                modifier = Modifier.size(18.dp)
+                            .shadow(4.dp, syurukShape)
+                            .clip(syurukShape)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(ext.cardGradientTop, ext.cardGradientBottom)
+                                )
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(ext.cardRimTop, ext.cardRimBottom)
+                                ),
+                                shape = syurukShape
+                            )
+                            .padding(horizontal = 16.dp, vertical = 11.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Rounded.WbTwilight,
+                                    contentDescription = null,
+                                    tint = ext.goldBright,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Waktu Syuruk (Tamat Subuh)",
+                                    fontSize = 13.sp,
+                                    color = ext.subtleText
+                                )
+                            }
                             Text(
-                                text = "Waktu Syuruk (Tamat Subuh)",
+                                text = todayTimes.getTime12For(PrayerName.SYURUK),
                                 fontSize = 13.sp,
-                                color = ext.subtleText
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        Text(
-                            text = todayTimes.getTime12For(PrayerName.SYURUK),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
                     }
                 }
-            }
 
-            // Senarai 5 Waktu Fardhu
-            items(PrayerName.fardhuList) { prayer ->
-                val isNext = nextPrayer != null && !nextPrayer.isTomorrow && nextPrayer.prayer == prayer
-                val alertMode = settings.alertModes[prayer] ?: AzanAlertMode.AZAN
+                // Senarai 5 Waktu Fardhu dengan Kad Kaca-Metalik & Butang Emas 3D
+                items(PrayerName.fardhuList) { prayer ->
+                    val isNext = nextPrayer != null && !nextPrayer.isTomorrow && nextPrayer.prayer == prayer
+                    val alertMode = settings.alertModes[prayer] ?: AzanAlertMode.AZAN
 
-                PrayerRowCard(
-                    prayer = prayer,
-                    time12 = todayTimes.getTime12For(prayer),
-                    isHighlighted = isNext,
-                    alertMode = alertMode,
-                    onToggleMode = {
-                        onTogglePrayerMode(prayer, alertMode.next())
-                    }
-                )
+                    PrayerRowCard(
+                        prayer = prayer,
+                        time12 = todayTimes.getTime12For(prayer),
+                        isHighlighted = isNext,
+                        alertMode = alertMode,
+                        onToggleMode = {
+                            onTogglePrayerMode(prayer, alertMode.next())
+                        }
+                    )
+                }
             }
         }
     }
@@ -391,19 +551,64 @@ private fun PrayerRowCard(
     onToggleMode: () -> Unit
 ) {
     val ext = LocalExtendedColors.current
+    val cardShape = RoundedCornerShape(18.dp)
 
-    Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = if (isHighlighted) ext.goldContainer else ext.cardBackground,
-        border = BorderStroke(
-            width = if (isHighlighted) 1.5.dp else 1.dp,
-            color = if (isHighlighted) ext.goldAccent else ext.cardBorder
-        )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(6.dp, cardShape)
+            .clip(cardShape)
+            .background(
+                if (isHighlighted) {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF234B3E),
+                            Color(0xFF102A23)
+                        )
+                    )
+                } else {
+                    Brush.verticalGradient(
+                        colors = listOf(ext.cardGradientTop, ext.cardGradientBottom)
+                    )
+                }
+            )
+            .drawWithContent {
+                drawContent()
+                // Pantulan Kilauan Kaca Pepenjuru pada Separuh Kiri Kad
+                val sheenPath = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(size.width * 0.56f, 0f)
+                    lineTo(size.width * 0.36f, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(
+                    path = sheenPath,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = if (ext.isDark) 0.065f else 0.30f),
+                            Color.White.copy(alpha = 0.01f)
+                        )
+                    )
+                )
+            }
+            .border(
+                width = if (isHighlighted) 1.5.dp else 1.1.dp,
+                brush = if (isHighlighted) {
+                    Brush.verticalGradient(
+                        colors = listOf(PaleGoldHighlight, WarmGold, DeepBronzeGold)
+                    )
+                } else {
+                    Brush.verticalGradient(
+                        colors = listOf(ext.cardRimTop, ext.cardRimBottom)
+                    )
+                },
+                shape = cardShape
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -412,13 +617,13 @@ private fun PrayerRowCard(
                     text = prayer.displayName,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isHighlighted) ext.goldBright else MaterialTheme.colorScheme.onSurface
+                    color = if (isHighlighted) ext.goldHighlight else MaterialTheme.colorScheme.onSurface
                 )
                 if (isHighlighted) {
                     Text(
                         text = "Waktu seterusnya",
                         fontSize = 11.sp,
-                        color = ext.goldAccent
+                        color = ext.goldBright
                     )
                 }
             }
@@ -427,25 +632,55 @@ private fun PrayerRowCard(
                 text = time12,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isHighlighted) ext.goldBright else MaterialTheme.colorScheme.onSurface,
+                color = if (isHighlighted) ext.goldHighlight else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(end = 12.dp)
             )
 
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = when (alertMode) {
-                    AzanAlertMode.AZAN -> ext.goldContainer
-                    AzanAlertMode.VIBRATE -> MaterialTheme.colorScheme.secondaryContainer
-                    AzanAlertMode.SILENT -> MaterialTheme.colorScheme.surfaceVariant
-                },
+            // Butang Pil Mod Bunyi 3D Berkilat
+            val btnShape = RoundedCornerShape(14.dp)
+            val btnBackground = when (alertMode) {
+                AzanAlertMode.AZAN -> Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFA87B22),
+                        Color(0xFF63460D),
+                        Color(0xFF422E07)
+                    )
+                )
+                AzanAlertMode.VIBRATE -> Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF215A4C),
+                        Color(0xFF11352C)
+                    )
+                )
+                AzanAlertMode.SILENT -> Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF1A362F),
+                        Color(0xFF0E211C)
+                    )
+                )
+            }
+            val btnBorder = when (alertMode) {
+                AzanAlertMode.AZAN -> Brush.verticalGradient(
+                    colors = listOf(PaleGoldHighlight, Color(0xFF8C6212))
+                )
+                AzanAlertMode.VIBRATE -> Brush.verticalGradient(
+                    colors = listOf(Color(0xFF8CE0C5), Color(0xFF26594C))
+                )
+                AzanAlertMode.SILENT -> Brush.verticalGradient(
+                    colors = listOf(Color(0xFF3E685D), Color(0xFF1D3831))
+                )
+            }
+
+            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .shadow(4.dp, btnShape)
+                    .clip(btnShape)
+                    .background(btnBackground)
+                    .border(width = 1.1.dp, brush = btnBorder, shape = btnShape)
                     .clickable(onClick = onToggleMode)
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = when (alertMode) {
                             AzanAlertMode.AZAN -> Icons.AutoMirrored.Rounded.VolumeUp
@@ -454,13 +689,13 @@ private fun PrayerRowCard(
                         },
                         contentDescription = alertMode.label,
                         tint = when (alertMode) {
-                            AzanAlertMode.AZAN -> ext.goldBright
-                            AzanAlertMode.VIBRATE -> MaterialTheme.colorScheme.onSecondaryContainer
-                            AzanAlertMode.SILENT -> ext.subtleText
+                            AzanAlertMode.AZAN -> PaleGoldHighlight
+                            AzanAlertMode.VIBRATE -> Color(0xFFBDF5E3)
+                            AzanAlertMode.SILENT -> MutedMintText
                         },
                         modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
                     Text(
                         text = when (alertMode) {
                             AzanAlertMode.AZAN -> "Azan"
@@ -468,11 +703,11 @@ private fun PrayerRowCard(
                             AzanAlertMode.SILENT -> "Senyap"
                         },
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = when (alertMode) {
-                            AzanAlertMode.AZAN -> ext.goldBright
-                            AzanAlertMode.VIBRATE -> MaterialTheme.colorScheme.onSecondaryContainer
-                            AzanAlertMode.SILENT -> ext.subtleText
+                            AzanAlertMode.AZAN -> Color(0xFFFFF5D1)
+                            AzanAlertMode.VIBRATE -> Color(0xFFD9FFF3)
+                            AzanAlertMode.SILENT -> MutedMintText
                         }
                     )
                 }
