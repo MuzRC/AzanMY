@@ -30,6 +30,12 @@ class AzanApp : Application() {
     private fun createNotificationChannels() {
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
 
+        // Padam saluran lama (IMPORTANCE_LOW) supaya Android tidak simpan tetapan lama di bahagian Silent
+        try {
+            nm.deleteNotificationChannel(PrayerStatusNotification.LEGACY_CHANNEL_ID_STATUS)
+        } catch (_: Exception) {
+        }
+
         val alarmChannel = NotificationChannel(
             AzanForegroundService.CHANNEL_ID_ALARM,
             "Laungan Azan Masuk Waktu",
@@ -42,12 +48,13 @@ class AzanApp : Application() {
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
 
+        // IMPORTANCE_DEFAULT tanpa bunyi/getar supaya duduk di bahagian atas notifikasi utama, bukan di Silent
         val statusChannel = NotificationChannel(
             PrayerStatusNotification.CHANNEL_ID_STATUS,
-            "Jadual Solat di Bar Status",
-            NotificationManager.IMPORTANCE_LOW
+            "Jadual Solat di Panel Utama",
+            NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Paparan senyap waktu solat seterusnya pada bar notifikasi."
+            description = "Paparan jadual waktu solat pada bahagian utama panel notifikasi tanpa bunyi."
             setSound(null, null)
             enableVibration(false)
             setShowBadge(false)

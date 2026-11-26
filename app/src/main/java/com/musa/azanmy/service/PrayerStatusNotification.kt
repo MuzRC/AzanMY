@@ -17,14 +17,20 @@ import com.musa.azanmy.data.PrayerName
 import com.musa.azanmy.data.PrayerPrefs
 import com.musa.azanmy.data.PrayerTimeCalculator
 import com.musa.azanmy.widget.PrayerWidgetProvider
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 object PrayerStatusNotification {
 
-    const val CHANNEL_ID_STATUS = "azan_status_channel"
+    const val LEGACY_CHANNEL_ID_STATUS = "azan_status_channel"
+    const val CHANNEL_ID_STATUS = "azan_status_channel_v2"
     const val CHANNEL_ID_ALERT = "azan_banner_channel"
 
     private const val NOTIF_ID_STATUS = 1001
     private const val NOTIF_ID_BANNER_BASE = 1100
+
+    private val compact12hFormatter = DateTimeFormatter.ofPattern("h:mm", Locale.ENGLISH)
 
     fun canPostNotifications(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -34,6 +40,14 @@ object PrayerStatusNotification {
             ) == PackageManager.PERMISSION_GRANTED
         } else {
             NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+    }
+
+    private fun formatCompact12(time24: String): String {
+        return try {
+            LocalTime.parse(time24.trim().take(5)).format(compact12hFormatter)
+        } catch (_: Exception) {
+            time24.take(5)
         }
     }
 
@@ -51,36 +65,32 @@ object PrayerStatusNotification {
         val (today, tomorrow) = prefs.getTodayAndTomorrow()
         val nextPrayer = PrayerTimeCalculator.findNextPrayer(today, tomorrow)
 
-        val compactTitle = if (nextPrayer != null) {
+        val hijriPart = today?.hijriFormatted?.takeIf { it.isNotBlank() }
+        val headerTitle = if (hijriPart != null) {
+            "${zone.code} (${zone.primaryArea}) • $hijriPart"
+        } else {
+            "${zone.code} (${zone.primaryArea})"
+        }
+
+        val subHeader = if (today != null && hijriPart != null) {
+            "${today.dayName}, $hijriPart"
+        } else {
+            "Waktu Solat Rasmi JAKIM"
+        }
+
+        val nextLine = if (nextPrayer != null) {
             val esokTag = if (nextPrayer.isTomorrow) " (Esok)" else ""
-            "${nextPrayer.prayer.displayName} • ${nextPrayer.time12}$esokTag"
+            "⏳ Seterusnya: ${nextPrayer.prayer.displayName} (${nextPrayer.time12})$esokTag"
         } else {
-            "Waktu Solat ${zone.shortTitle}"
+            "Sila tekan Segerak untuk muat turun jadual JAKIM"
         }
 
-        val compactSub = if (today != null && today.hijriFormatted.isNotBlank()) {
-            "${zone.shortTitle} • ${today.hijriFormatted}"
+        val expandedBody = if (today != null) {
+            val row1 = "Subuh ${formatCompact12(today.subuh)} • Syuruk ${formatCompact12(today.syuruk)} • Zohor ${formatCompact12(today.zohor)}"
+            val row2 = "Asar ${formatCompact12(today.asar)} • Maghrib ${formatCompact12(today.maghrib)} • Isyak ${formatCompact12(today.isyak)}"
+            "$nextLine\n\n$row1\n$row2"
         } else {
-            zone.shortTitle
-        }
-
-        val inboxStyle = NotificationCompat.InboxStyle()
-            .setBigContentTitle("Jadual Solat • ${zone.shortTitle}")
-
-        if (today != null) {
-            if (today.hijriFormatted.isNotBlank()) {
-                inboxStyle.setSummaryText("${today.dayName}, ${today.hijriFormatted}")
-            }
-            for (prayer in PrayerName.fardhuList) {
-                val marker = if (nextPrayer != null && !nextPrayer.isTomorrow && nextPrayer.prayer == prayer) {
-                    "▶ "
-                } else {
-                    "    "
-                }
-                inboxStyle.addLine("$marker${prayer.displayName}: ${today.getTime12For(prayer)}")
-            }
-        } else {
-            inboxStyle.addLine("Sila sambung internet untuk muat turun jadual JAKIM.")
+            nextLine
         }
 
         val openIntent = Intent(appContext, MainActivity::class.java).apply {
@@ -90,6 +100,16 @@ object PrayerStatusNotification {
             appContext,
             1010,
             openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val syncIntent = Intent(appContext, PrayerWidgetProvider::class.java).apply {
+            action = PrayerWidgetProvider.ACTION_SYNC_FROM_NOTIF
+        }
+        val syncPendingIntent = PendingIntent.getBroadcast(
+            appContext,
+            1012,
+            syncIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -105,17 +125,24 @@ object PrayerStatusNotification {
 
         val notification = NotificationCompat.Builder(appContext, CHANNEL_ID_STATUS)
             .setSmallIcon(R.drawable.ic_notif_mosque)
-            .setContentTitle(compactTitle)
-            .setContentText(compactSub)
-            .setStyle(inboxStyle)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setContentTitle(headerTitle)
+            .setContentText(nextLine)
+            .setSubText(subHeader)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .setBigContentTitle(headerTitle)
+                    .bigText(expandedBody)
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSortKey("0000")
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setContentIntent(openPendingIntent)
             .setDeleteIntent(deletePendingIntent)
+            .addAction(0, "Buka", openPendingIntent)
+            .addAction(0, "Segerak", syncPendingIntent)
             .build()
 
         try {

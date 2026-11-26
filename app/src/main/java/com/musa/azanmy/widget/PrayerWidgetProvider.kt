@@ -9,6 +9,7 @@ import android.content.Intent
 import android.widget.RemoteViews
 import com.musa.azanmy.MainActivity
 import com.musa.azanmy.R
+import com.musa.azanmy.alarm.PrayerSyncWorker
 import com.musa.azanmy.data.JakimZoneData
 import com.musa.azanmy.data.PrayerName
 import com.musa.azanmy.data.PrayerPrefs
@@ -22,6 +23,7 @@ class PrayerWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_RESTORE_STATUS_NOTIF = "com.musa.azanmy.action.RESTORE_STATUS_NOTIF"
+        const val ACTION_SYNC_FROM_NOTIF = "com.musa.azanmy.action.SYNC_FROM_NOTIF"
 
         private const val COLOR_GOLD_BRIGHT = 0xFFE6C252.toInt()
         private const val COLOR_WHITE_PRIMARY = 0xFFF5F7F6.toInt()
@@ -111,17 +113,33 @@ class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == ACTION_RESTORE_STATUS_NOTIF) {
-            val appContext = context.applicationContext
-            val pendingResult = goAsync()
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    PrayerStatusNotification.update(appContext)
-                } finally {
-                    pendingResult.finish()
+        when (intent.action) {
+            ACTION_RESTORE_STATUS_NOTIF -> {
+                val appContext = context.applicationContext
+                val pendingResult = goAsync()
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        PrayerStatusNotification.update(appContext)
+                    } finally {
+                        pendingResult.finish()
+                    }
                 }
+                return
             }
-            return
+
+            ACTION_SYNC_FROM_NOTIF -> {
+                val appContext = context.applicationContext
+                val pendingResult = goAsync()
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        PrayerSyncWorker.syncSchedules(appContext, forceReplace = true)
+                        PrayerStatusNotification.update(appContext)
+                    } finally {
+                        pendingResult.finish()
+                    }
+                }
+                return
+            }
         }
         super.onReceive(context, intent)
     }
