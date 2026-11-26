@@ -1,12 +1,7 @@
 name: Build & Release Signed APK
 
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'version.json'
-      - 'README.md'
-  workflow_dispatch:
+ workflow_dispatch:
 
 permissions:
   contents: write
