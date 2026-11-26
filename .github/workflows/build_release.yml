@@ -12,7 +12,6 @@ permissions:
   contents: write
   models: read
 
-# Paksa semua actions guna Node.js 24 untuk hilangkan amaran deprecation
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -121,7 +120,7 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
-- name: 4. Kemas Kini Versi dalam Gradle
+      - name: 4. Kemas Kini Versi dalam Gradle
         run: |
           GRADLE_FILE="app/build.gradle.kts"
           if [ ! -f "$GRADLE_FILE" ]; then
