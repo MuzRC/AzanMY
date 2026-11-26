@@ -1,0 +1,130 @@
+name: Build & Release Signed APK
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'version.json'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Calculate Auto Version
+        id: version
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          MINOR=$((COMMIT_COUNT / 10))
+          PATCH=$((COMMIT_COUNT % 10))
+          VERSION_CODE=$((100 + COMMIT_COUNT))
+          VERSION_NAME="1.${MINOR}.${PATCH}"
+          TAG_NAME="v${VERSION_NAME}"
+          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Build Unsigned Release APK
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: gradle assembleRelease
+
+      - name: Decode or Generate Signing Keystore & Sign APK
+        id: sign
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+            KS_PASS="${{ secrets.STORE_PASSWORD }}"
+            KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
+            KEY_PASS="${{ secrets.KEY_PASSWORD }}"
+          else
+            KS_PASS="AzanMY2026Pass"
+            KEY_ALIAS="azanmy"
+            KEY_PASS="AzanMY2026Pass"
+            keytool -genkeypair -v -keystore release.keystore -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$KS_PASS" -keypass "$KEY_PASS" \
+              -dname "CN=Musa Bin Sarudin, OU=Development, O=AzanMY, L=Beaufort, S=Sabah, C=MY"
+          fi
+
+          BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -maxdepth 1 -mindepth 1 | sort -V | tail -n 1)
+          UNSIGNED_APK="app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED_APK="app/build/outputs/apk/release/app-release-aligned.apk"
+          FINAL_APK="AzanMY-${{ steps.version.outputs.tag_name }}-release.apk"
+
+          "$BUILD_TOOLS_DIR/zipalign" -v -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
+          "$BUILD_TOOLS_DIR/apksigner" sign --ks release.keystore \
+            --ks-pass "pass:$KS_PASS" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass "pass:$KEY_PASS" \
+            --out "$FINAL_APK" "$ALIGNED_APK"
+
+          echo "apk_file=$FINAL_APK" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with Auto-Generated Notes
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: "AzanMY ${{ steps.version.outputs.tag_name }}"
+          generate_release_notes: true
+          files: ${{ steps.sign.outputs.apk_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch Release Notes & Update version.json
+        run: |
+          TAG="${{ steps.version.outputs.tag_name }}"
+          export V_CODE="${{ steps.version.outputs.version_code }}"
+          export V_NAME="${{ steps.version.outputs.version_name }}"
+          APK_NAME="${{ steps.sign.outputs.apk_file }}"
+          export APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APK_NAME}"
+          export TODAY=$(date -u +"%Y-%m-%d")
+
+          RELEASE_BODY=$(gh release view "$TAG" --json body -q .body 2>/dev/null || echo "")
+          if [ -z "$RELEASE_BODY" ]; then
+            RELEASE_BODY="Penambahbaikan prestasi dan kestabilan AzanMY."
+          fi
+          export NOTES="$RELEASE_BODY"
+
+          python3 -c '
+          import json, os
+          data = {
+              "versionCode": int(os.environ["V_CODE"]),
+              "versionName": os.environ["V_NAME"],
+              "apkUrl": os.environ["APK_URL"],
+              "releaseNotes": os.environ["NOTES"],
+              "updatedAt": os.environ["TODAY"]
+          }
+          with open("version.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+          '
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "chore: update version.json to ${TAG} [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
