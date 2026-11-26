@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Corak Rub el Hizb Lutsinar untuk Kad Utama -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M25,25 L95,25 L95,95 L25,95 Z"
+        android:strokeAlpha="0.08"
+        android:strokeColor="#FFD4AF37"
+        android:strokeWidth="1.2" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M60,10.5 L109.5,60 L60,109.5 L10.5,60 Z"
+        android:strokeAlpha="0.08"
+        android:strokeColor="#FFD4AF37"
+        android:strokeWidth="1.2" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M60,36 A24,24 0 1,1 59.99,36 Z"
+        android:strokeAlpha="0.06"
+        android:strokeColor="#FFD4AF37"
+        android:strokeWidth="1.0" />
+</vector>

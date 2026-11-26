@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Puncak Menara & Bulan Sabit Emas -->
+    <path
+        android:fillColor="#FFE6C252"
+        android:pathData="M54,25 C55.2,25 56,26 56,27.2 L56,31 C54.7,30.8 53.3,30.8 52,31 L52,27.2 C52,26 52.8,25 54,25 Z" />
+
+    <!-- Kubah Masjid Moden -->
+    <path
+        android:fillColor="#FFD4AF37"
+        android:pathData="M54,32 C43,39 36,47 36,56 L72,56 C72,47 65,39 54,32 Z" />
+
+    <!-- Badan Utama & Gerbang Mihrab -->
+    <path
+        android:fillColor="#FFE6C252"
+        android:pathData="M34,58 L74,58 L74,75 C74,76.7 72.7,78 71,78 L60,78 L60,68 C60,64.7 57.3,62 54,62 C50.7,62 48,64.7 48,68 L48,78 L37,78 C35.3,78 34,76.7 34,75 Z" />
+
+    <!-- Gelombang Laungan Azan Kiri & Kanan -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,45 C26.5,48.5 26.5,53.5 29,57"
+        android:strokeColor="#FFE6C252"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.2" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,45 C81.5,48.5 81.5,53.5 79,57"
+        android:strokeColor="#FFE6C252"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.2" />
+</vector>

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_emerald"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- Baris Atas: Kod Zon JAKIM & Tarikh Hijrah -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_widget_zone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="SBH07 • Beaufort"
+            android:textColor="#FFA3C4BC"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_widget_hijri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="AzanMY"
+            android:textColor="#FFD4AF37"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Bahagian Tengah: Waktu Solat Seterusnya -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_widget_next_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WAKTU SETERUSNYA"
+                android:textColor="#FF86A89F"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_widget_next_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Maghrib"
+                android:textColor="#FFF5F7F6"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_widget_next_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="06:08 PM"
+            android:textColor="#FFE6C252"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Baris Bawah: 5 Waktu Solat Harian -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <!-- Subuh -->
+        <LinearLayout
+            android:id="@+id/col_subuh"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tv_subuh_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Subuh"
+                android:textColor="#FFA3C4BC"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_subuh_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFF5F7F6"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Zohor -->
+        <LinearLayout
+            android:id="@+id/col_zohor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tv_zohor_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Zohor"
+                android:textColor="#FFA3C4BC"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_zohor_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFF5F7F6"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Asar -->
+        <LinearLayout
+            android:id="@+id/col_asar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tv_asar_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Asar"
+                android:textColor="#FFA3C4BC"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_asar_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFF5F7F6"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Maghrib -->
+        <LinearLayout
+            android:id="@+id/col_maghrib"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tv_maghrib_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Maghrib"
+                android:textColor="#FFA3C4BC"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_maghrib_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFF5F7F6"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Isyak -->
+        <LinearLayout
+            android:id="@+id/col_isyak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tv_isyak_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Isyak"
+                android:textColor="#FFA3C4BC"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/tv_isyak_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--:--"
+                android:textColor="#FFF5F7F6"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
