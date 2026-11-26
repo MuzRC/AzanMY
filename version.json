@@ -1,9 +1,9 @@
 {
-  "versionCode": 20,
-  "versionName": "1.0.20",
-  "latestVersion": "1.0.20",
-  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.20/AzanMY-v1.0.20-signed.apk",
-  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.20/AzanMY-v1.0.20-signed.apk",
-  "releaseNotes": "- Add files via upload\n- Update build_release.yml for Node.js and Gradle version\n- Update build_release.yml\n- Add push trigger to build_release workflow\n- Set static version code and name in build.gradle.kts\n- Update build_release.yml\n- Update GitHub Actions workflow for APK release\n- Add lifecycle-runtime-compose dependency\n- Update workflow triggers in build_release.yml\n- Add files via upload",
+  "versionCode": 22,
+  "versionName": "1.0.22",
+  "latestVersion": "1.0.22",
+  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.22/AzanMY-v1.0.22-signed.apk",
+  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.22/AzanMY-v1.0.22-signed.apk",
+  "releaseNotes": "- Add files via upload\n- chore: kemaskini version.json ke v1.0.20 (build 20) [skip ci]",
   "updatedAt": "2026-11-26"
 }
