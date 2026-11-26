@@ -22,12 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Vibration
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -448,7 +448,7 @@ private fun PrayerRowCard(
                 ) {
                     Icon(
                         imageVector = when (alertMode) {
-                            AzanAlertMode.AZAN -> Icons.Rounded.VolumeUp
+                            AzanAlertMode.AZAN -> Icons.AutoMirrored.Rounded.VolumeUp
                             AzanAlertMode.VIBRATE -> Icons.Rounded.Vibration
                             AzanAlertMode.SILENT -> Icons.Rounded.NotificationsOff
                         },
