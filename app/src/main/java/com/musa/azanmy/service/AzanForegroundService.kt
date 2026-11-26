@@ -113,6 +113,7 @@ class AzanForegroundService : Service() {
             val started = AzanAudioPlayer.playPrayerAzan(
                 context = applicationContext,
                 rawName = rawName,
+                autoBoostVolume = settings.autoBoostAlarmVolume,
                 onFinished = {
                     stopSelf()
                 }

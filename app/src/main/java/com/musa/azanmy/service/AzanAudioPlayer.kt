@@ -17,6 +17,7 @@ import com.musa.azanmy.data.AzanAudioCatalog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.math.ceil
 
 object AzanAudioPlayer {
 
@@ -54,6 +55,7 @@ object AzanAudioPlayer {
     fun playPrayerAzan(
         context: Context,
         rawName: String,
+        autoBoostVolume: Boolean = true,
         onFinished: () -> Unit
     ): Boolean {
         if (isCallInProgress(context)) {
@@ -68,12 +70,17 @@ object AzanAudioPlayer {
         return startPlaybackInternal(
             context = context.applicationContext,
             rawName = rawName,
-            isPreview = false
+            isPreview = false,
+            autoBoostVolume = autoBoostVolume
         )
     }
 
     @Synchronized
-    fun togglePreview(context: Context, rawName: String) {
+    fun togglePreview(
+        context: Context,
+        rawName: String,
+        autoBoostVolume: Boolean = true
+    ) {
         if (isActualPrayerActive) return
 
         val currentlyPlaying = _playingPreviewRawName.value
@@ -87,17 +94,36 @@ object AzanAudioPlayer {
         startPlaybackInternal(
             context = context.applicationContext,
             rawName = rawName,
-            isPreview = true
+            isPreview = true,
+            autoBoostVolume = autoBoostVolume
         )
+    }
+
+    private fun ensureMinimumAlarmVolume(am: AudioManager) {
+        try {
+            val maxVol = am.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            if (maxVol <= 0) return
+            val currentVol = am.getStreamVolume(AudioManager.STREAM_ALARM)
+            val targetVol = ceil(maxVol * 0.80).toInt().coerceIn(1, maxVol)
+            if (currentVol < targetVol) {
+                am.setStreamVolume(AudioManager.STREAM_ALARM, targetVol, 0)
+            }
+        } catch (_: Exception) {
+        }
     }
 
     private fun startPlaybackInternal(
         context: Context,
         rawName: String,
-        isPreview: Boolean
+        isPreview: Boolean,
+        autoBoostVolume: Boolean
     ): Boolean {
         val am = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
         activeAudioManager = am
+
+        if (am != null && autoBoostVolume) {
+            ensureMinimumAlarmVolume(am)
+        }
 
         val alarmAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_ALARM)

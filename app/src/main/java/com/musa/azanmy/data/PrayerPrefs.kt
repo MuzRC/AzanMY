@@ -23,6 +23,7 @@ data class UserSettingsState(
     val selectedDailyAzanId: String = AzanAudioCatalog.DEFAULT_DAILY_ID,
     val themePreference: ThemePreference = ThemePreference.DARK,
     val showStatusNotification: Boolean = true,
+    val autoBoostAlarmVolume: Boolean = true,
     val lastSyncMillis: Long = 0L,
     val alertModes: Map<PrayerName, AzanAlertMode> = PrayerName.fardhuList.associateWith { AzanAlertMode.AZAN }
 )
@@ -35,6 +36,7 @@ class PrayerPrefs(private val context: Context) {
         private val KEY_DAILY_AZAN_ID = stringPreferencesKey("daily_azan_id")
         private val KEY_THEME_PREF = stringPreferencesKey("theme_pref")
         private val KEY_SHOW_STATUS_NOTIF = booleanPreferencesKey("show_status_notif")
+        private val KEY_AUTO_BOOST_VOLUME = booleanPreferencesKey("auto_boost_alarm_volume")
         private val KEY_LAST_SYNC_MILLIS = longPreferencesKey("last_sync_millis")
         private val KEY_CACHED_SCHEDULE = stringPreferencesKey("cached_schedule_json")
 
@@ -52,6 +54,7 @@ class PrayerPrefs(private val context: Context) {
             selectedDailyAzanId = prefs[KEY_DAILY_AZAN_ID] ?: AzanAudioCatalog.DEFAULT_DAILY_ID,
             themePreference = ThemePreference.fromCode(prefs[KEY_THEME_PREF]),
             showStatusNotification = prefs[KEY_SHOW_STATUS_NOTIF] ?: true,
+            autoBoostAlarmVolume = prefs[KEY_AUTO_BOOST_VOLUME] ?: true,
             lastSyncMillis = prefs[KEY_LAST_SYNC_MILLIS] ?: 0L,
             alertModes = modes
         )
@@ -100,6 +103,12 @@ class PrayerPrefs(private val context: Context) {
     suspend fun setShowStatusNotification(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[KEY_SHOW_STATUS_NOTIF] = enabled
+        }
+    }
+
+    suspend fun setAutoBoostAlarmVolume(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_AUTO_BOOST_VOLUME] = enabled
         }
     }
 

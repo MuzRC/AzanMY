@@ -224,7 +224,13 @@ fun SettingsScreen(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Button(
-                        onClick = { AzanAudioPlayer.togglePreview(context, subuhTrack.rawName) },
+                        onClick = {
+                            AzanAudioPlayer.togglePreview(
+                                context = context,
+                                rawName = subuhTrack.rawName,
+                                autoBoostVolume = settings.autoBoostAlarmVolume
+                            )
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ext.goldContainer,
                             contentColor = ext.goldBright
@@ -282,9 +288,57 @@ fun SettingsScreen(
                     scope.launch {
                         prefs.setSelectedDailyAzanId(option.id)
                     }
-                    AzanAudioPlayer.togglePreview(context, option.rawName)
+                    AzanAudioPlayer.togglePreview(
+                        context = context,
+                        rawName = option.rawName,
+                        autoBoostVolume = settings.autoBoostAlarmVolume
+                    )
                 }
             )
+        }
+
+        // Kad Suis Auto-Naikkan Volume Penggera
+        item {
+            Surface(
+                shape = RoundedCornerShape(18.dp),
+                color = ext.cardBackground,
+                border = BorderStroke(1.dp, ext.cardBorder)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 10.dp)) {
+                        Text(
+                            text = "Auto-Naikkan Volume Penggera (80%)",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Naikkan bunyi penggera ke 80% secara automatik jika di bawah 80% dan kekalkan tahap tersebut",
+                            fontSize = 12.sp,
+                            color = ext.subtleText
+                        )
+                    }
+                    Switch(
+                        checked = settings.autoBoostAlarmVolume,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                prefs.setAutoBoostAlarmVolume(enabled)
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color(0xFF1A1400),
+                            checkedTrackColor = BrightGold
+                        )
+                    )
+                }
+            }
         }
 
         // Bahagian 4: Zon JAKIM, Notifikasi Status & Tema
