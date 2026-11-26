@@ -4,9 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val appVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
-val appVersionName = System.getenv("VERSION_NAME") ?: "1.0.0"
-
 android {
     namespace = "com.musa.azanmy"
     compileSdk = 36
@@ -15,8 +12,8 @@ android {
         applicationId = "com.musa.azanmy"
         minSdk = 26
         targetSdk = 36
-        versionCode = appVersionCode
-        versionName = appVersionName
+        versionCode = 1
+        versionName = "1.0.0"
 
         vectorDrawables {
             useSupportLibrary = true
