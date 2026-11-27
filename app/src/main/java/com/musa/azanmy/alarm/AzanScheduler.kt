@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.musa.azanmy.MainActivity
 import com.musa.azanmy.data.PrayerName
 import com.musa.azanmy.data.PrayerPrefs
 import com.musa.azanmy.data.PrayerTimeCalculator
@@ -19,6 +20,7 @@ object AzanScheduler {
 
     private const val REQ_CODE_PRAYER = 3001
     private const val REQ_CODE_MIDNIGHT = 3002
+    private const val REQ_CODE_SHOW_APP = 3003
 
     fun canScheduleExactAlarms(context: Context): Boolean {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return false
@@ -75,13 +77,20 @@ object AzanScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val showAppIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val showPendingIntent = PendingIntent.getActivity(
+            context,
+            REQ_CODE_SHOW_APP,
+            showAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         try {
             if (canScheduleExactAlarms(context)) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerMillis,
-                    pendingIntent
-                )
+                val alarmClockInfo = AlarmManager.AlarmClockInfo(triggerMillis, showPendingIntent)
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
             } else {
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
