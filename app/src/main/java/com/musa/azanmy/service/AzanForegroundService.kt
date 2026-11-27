@@ -37,12 +37,47 @@ class AzanForegroundService : Service() {
         const val ACTION_STOP_AZAN = "com.musa.azanmy.action.STOP_AZAN"
         const val EXTRA_PRAYER_NAME = "extra_prayer_name"
 
+        @Volatile
+        private var handoffWakeLock: PowerManager.WakeLock? = null
+
+        private fun acquireHandoffWakeLock(context: Context) {
+            try {
+                val pm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
+                if (handoffWakeLock == null) {
+                    handoffWakeLock = pm?.newWakeLock(
+                        PowerManager.PARTIAL_WAKE_LOCK,
+                        "AzanMY::ServiceHandoffWakeLock"
+                    )?.apply {
+                        setReferenceCounted(false)
+                    }
+                }
+                handoffWakeLock?.acquire(30_000L)
+            } catch (_: Exception) {
+            }
+        }
+
+        private fun releaseHandoffWakeLock() {
+            try {
+                if (handoffWakeLock?.isHeld == true) {
+                    handoffWakeLock?.release()
+                }
+            } catch (_: Exception) {
+            }
+        }
+
         fun startAzan(context: Context, prayer: PrayerName) {
-            val intent = Intent(context, AzanForegroundService::class.java).apply {
+            val appCtx = context.applicationContext
+            acquireHandoffWakeLock(appCtx)
+            val intent = Intent(appCtx, AzanForegroundService::class.java).apply {
                 action = ACTION_START_AZAN
                 putExtra(EXTRA_PRAYER_NAME, prayer.name)
             }
-            ContextCompat.startForegroundService(context, intent)
+            try {
+                ContextCompat.startForegroundService(appCtx, intent)
+            } catch (e: Exception) {
+                releaseHandoffWakeLock()
+                throw e
+            }
         }
 
         fun stopAzan(context: Context) {
@@ -66,6 +101,9 @@ class AzanForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        acquireWakeLock()
+        releaseHandoffWakeLock()
+
         if (intent?.action == ACTION_STOP_AZAN) {
             stopAzanAndSelf()
             return START_NOT_STICKY
@@ -226,13 +264,15 @@ class AzanForegroundService : Service() {
     private fun acquireWakeLock() {
         try {
             val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager
-            wakeLock = pm?.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK,
-                "AzanMY::AzanPlaybackWakeLock"
-            )?.apply {
-                setReferenceCounted(false)
-                acquire(6 * 60 * 1000L)
+            if (wakeLock == null) {
+                wakeLock = pm?.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK,
+                    "AzanMY::AzanPlaybackWakeLock"
+                )?.apply {
+                    setReferenceCounted(false)
+                }
             }
+            wakeLock?.acquire(6 * 60 * 1000L)
         } catch (_: Exception) {
         }
     }
@@ -265,6 +305,7 @@ class AzanForegroundService : Service() {
             mediaSession = null
         }
         releaseWakeLock()
+        releaseHandoffWakeLock()
         serviceScope.cancel()
         super.onDestroy()
     }
