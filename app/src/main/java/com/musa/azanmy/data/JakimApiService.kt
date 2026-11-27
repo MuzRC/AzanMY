@@ -186,7 +186,7 @@ object JakimApiService {
     private fun normalizeDateToIso(rawDate: String): String {
         val trimmed = rawDate.trim()
         if (trimmed.isBlank()) return ""
-        if (trimmed.matches(Regex("\d{4}-\d{2}-\d{2}"))) {
+        if (trimmed.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) {
             return trimmed
         }
         return try {
