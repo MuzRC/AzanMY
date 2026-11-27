@@ -223,6 +223,7 @@ class AzanForegroundService : Service() {
         .setPriority(NotificationCompat.PRIORITY_MAX)
         .setCategory(NotificationCompat.CATEGORY_ALARM)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         .setOngoing(true)
         .setContentIntent(createOpenAppPendingIntent())
         .addAction(

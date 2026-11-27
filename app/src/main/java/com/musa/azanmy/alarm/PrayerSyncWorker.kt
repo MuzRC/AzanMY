@@ -1,6 +1,7 @@
 package com.musa.azanmy.alarm
 
 import android.content.Context
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -21,27 +22,47 @@ class PrayerSyncWorker(
 
     override suspend fun doWork(): Result {
         val syncResult = syncSchedules(applicationContext, forceReplace = false)
-        return if (syncResult.isSuccess) {
-            Result.success()
-        } else {
-            Result.retry()
+        if (syncResult.isFailure) {
+            return if (runAttemptCount < 4) Result.retry() else Result.failure()
         }
+
+        // Pastikan jadual bulan hadapan wujud apabila menghampiri hujung bulan
+        val today = LocalDate.now()
+        if (today.dayOfMonth >= NEXT_MONTH_PREFETCH_DAY) {
+            val firstOfNextMonth = YearMonth.now().plusMonths(1).atDay(1).toString()
+            val cachedMap = PrayerPrefs(applicationContext).getScheduleMap()
+            if (cachedMap[firstOfNextMonth] == null && runAttemptCount < 4) {
+                return Result.retry()
+            }
+        }
+
+        return Result.success()
     }
 
     companion object {
-        private const val UNIQUE_WORK_NAME = "azanmy_weekly_jakim_sync"
+        private const val LEGACY_UNIQUE_WORK_NAME = "azanmy_weekly_jakim_sync"
+        private const val UNIQUE_WORK_NAME = "azanmy_periodic_jakim_sync_v2"
+        private const val SYNC_INTERVAL_DAYS = 2L
+        private const val NEXT_MONTH_PREFETCH_DAY = 20
         private const val SEVEN_DAYS_MILLIS = 7L * 24L * 60L * 60L * 1000L
 
         fun enqueueWeeklySync(context: Context) {
+            val wm = WorkManager.getInstance(context.applicationContext)
+            try {
+                wm.cancelUniqueWork(LEGACY_UNIQUE_WORK_NAME)
+            } catch (_: Exception) {
+            }
+
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-            val request = PeriodicWorkRequestBuilder<PrayerSyncWorker>(7, TimeUnit.DAYS)
+            val request = PeriodicWorkRequestBuilder<PrayerSyncWorker>(SYNC_INTERVAL_DAYS, TimeUnit.DAYS)
                 .setConstraints(constraints)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.MINUTES)
                 .build()
 
-            WorkManager.getInstance(context.applicationContext).enqueueUniquePeriodicWork(
+            wm.enqueueUniquePeriodicWork(
                 UNIQUE_WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
                 request
@@ -52,9 +73,13 @@ class PrayerSyncWorker(
             val prefs = PrayerPrefs(context.applicationContext)
             val settings = prefs.getSettings()
             val (today, tomorrow) = prefs.getTodayAndTomorrow()
+            val nowDate = LocalDate.now()
+            val cachedMap = prefs.getScheduleMap()
+            val nextMonthFirst = YearMonth.now().plusMonths(1).atDay(1).toString()
+            val needsNextMonth = nowDate.dayOfMonth >= NEXT_MONTH_PREFETCH_DAY && cachedMap[nextMonthFirst] == null
             val isExpired = (System.currentTimeMillis() - settings.lastSyncMillis) >= SEVEN_DAYS_MILLIS
 
-            if (today == null || tomorrow == null || isExpired) {
+            if (today == null || tomorrow == null || needsNextMonth || isExpired) {
                 syncSchedules(context.applicationContext, forceReplace = false)
             }
         }
@@ -82,22 +107,30 @@ class PrayerSyncWorker(
             val today = LocalDate.now()
             val cachedMap = prefs.getScheduleMap()
             val tomorrowMissing = cachedMap[today.plusDays(1).toString()] == null
+            val upcomingMissing = (1L..5L).any { cachedMap[today.plusDays(it).toString()] == null }
 
-            if (today.dayOfMonth >= 25 || tomorrowMissing) {
+            var nextMonthFailure: Throwable? = null
+            if (today.dayOfMonth >= NEXT_MONTH_PREFETCH_DAY || tomorrowMissing || upcomingMissing) {
                 val nextMonth = currentMonth.plusMonths(1)
                 val nextResult = JakimApiService.fetchMonthSchedule(zoneCode, nextMonth)
-                nextResult.getOrNull()?.let { nextDays ->
-                    if (nextDays.isNotEmpty()) {
-                        val nextChanged = prefs.mergeAndSaveSchedule(
-                            newDays = nextDays,
-                            replaceAllForZone = false
-                        )
-                        hasChanges = hasChanges || nextChanged
-                    }
+                val nextDays = nextResult.getOrNull()
+                if (!nextDays.isNullOrEmpty()) {
+                    val nextChanged = prefs.mergeAndSaveSchedule(
+                        newDays = nextDays,
+                        replaceAllForZone = false
+                    )
+                    hasChanges = hasChanges || nextChanged
+                } else {
+                    nextMonthFailure = nextResult.exceptionOrNull()
                 }
             }
 
             AzanScheduler.scheduleNext(appContext)
+
+            if (tomorrowMissing && nextMonthFailure != null) {
+                return kotlin.Result.failure(nextMonthFailure)
+            }
+
             return kotlin.Result.success(hasChanges)
         }
     }

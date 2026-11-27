@@ -459,7 +459,7 @@ fun SettingsScreen(
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "$lastSyncLabel (Auto-semak setiap 7 hari & 25hb)",
+                            text = "$lastSyncLabel (Auto-semak setiap 2 hari & 20hb)",
                             fontSize = 11.sp,
                             color = ext.subtleText
                         )

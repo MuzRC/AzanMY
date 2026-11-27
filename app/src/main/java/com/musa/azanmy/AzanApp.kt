@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.os.UserManager
 import com.musa.azanmy.alarm.AzanScheduler
 import com.musa.azanmy.alarm.PrayerSyncWorker
 import com.musa.azanmy.service.AzanForegroundService
@@ -21,9 +22,23 @@ class AzanApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
-        PrayerSyncWorker.enqueueWeeklySync(this)
+
+        val userManager = getSystemService(Context.USER_SERVICE) as? UserManager
+        val isUnlocked = userManager?.isUserUnlocked ?: true
+        if (!isUnlocked) {
+            return
+        }
+
+        try {
+            PrayerSyncWorker.enqueueWeeklySync(this)
+        } catch (_: Exception) {
+        }
+
         appScope.launch {
-            AzanScheduler.scheduleNext(applicationContext)
+            try {
+                AzanScheduler.scheduleNext(applicationContext)
+            } catch (_: Exception) {
+            }
         }
     }
 

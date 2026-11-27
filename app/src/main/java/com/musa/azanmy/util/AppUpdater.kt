@@ -192,14 +192,12 @@ object AppUpdater {
         val outFile = File(updatesDir, "AzanMY-v$safeVersion.apk")
         val partFile = File(updatesDir, "AzanMY-v$safeVersion.apk.part")
 
-        // Buang fail lama selain .part untuk versi semasa
         updatesDir.listFiles()?.forEach { file ->
             if (file.name != partFile.name) {
                 file.delete()
             }
         }
 
-        // Buang .part yang terlalu lama (> 30 minit) supaya tidak rosak
         if (partFile.exists()) {
             val ageMs = System.currentTimeMillis() - partFile.lastModified()
             if (ageMs > 30 * 60 * 1000L) {

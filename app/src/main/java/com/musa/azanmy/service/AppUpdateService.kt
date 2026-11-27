@@ -194,6 +194,24 @@ class AppUpdateService : Service() {
         return START_NOT_STICKY
     }
 
+    override fun onTimeout(startId: Int) {
+        handleSystemTimeout()
+    }
+
+    override fun onTimeout(startId: Int, fgsType: Int) {
+        handleSystemTimeout()
+    }
+
+    private fun handleSystemTimeout() {
+        AppUpdater.abortActiveNetworkCall()
+        downloadJob?.cancel()
+        downloadJob = null
+        AppUpdater.markError("Muat turun dihentikan sementara oleh had masa sistem. Sila tekan semula untuk sambung.")
+        releaseLocks()
+        stopForegroundCompat()
+        stopSelf()
+    }
+
     private fun startForegroundCompat(notification: Notification) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -279,6 +297,7 @@ class AppUpdateService : Service() {
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setContentIntent(openPending)
             .addAction(
                 android.R.drawable.ic_menu_close_clear_cancel,
