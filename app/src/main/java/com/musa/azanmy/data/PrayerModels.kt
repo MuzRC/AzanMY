@@ -112,13 +112,28 @@ data class AppReleaseInfo(
 
 object PrayerTimeCalculator {
     private val formatter12h = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
+    private val formatter24h = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH)
+
+    private fun parseLocalTimeSafe(time24: String): LocalTime? {
+        val parts = time24.trim().split(":")
+        if (parts.size < 2) return null
+        val hour = parts[0].toIntOrNull() ?: return null
+        val minute = parts[1].toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+        return LocalTime.of(hour, minute, 0, 0)
+    }
+
+    private fun format24Short(time24: String): String {
+        val time = parseLocalTimeSafe(time24) ?: return time24.trim().take(5)
+        return time.format(formatter24h)
+    }
 
     fun format24To12(time24: String): String {
         return try {
-            val clean = time24.trim().take(5)
-            LocalTime.parse(clean).format(formatter12h)
+            val time = parseLocalTimeSafe(time24) ?: return time24.trim().take(5)
+            time.format(formatter12h)
         } catch (_: Exception) {
-            time24.take(5)
+            time24.trim().take(5)
         }
     }
 
@@ -128,9 +143,8 @@ object PrayerTimeCalculator {
         zoneId: ZoneId = ZoneId.systemDefault()
     ): Long {
         return try {
-            val date = LocalDate.parse(dateIso)
-            val clean = time24.trim().take(5)
-            val time = LocalTime.parse(clean)
+            val date = LocalDate.parse(dateIso.trim())
+            val time = parseLocalTimeSafe(time24) ?: return 0L
             ZonedDateTime.of(date, time, zoneId).toInstant().toEpochMilli()
         } catch (_: Exception) {
             0L
@@ -156,7 +170,7 @@ object PrayerTimeCalculator {
                     return NextPrayerInfo(
                         prayer = prayer,
                         triggerMillis = millis,
-                        time24 = time24.take(5),
+                        time24 = format24Short(time24),
                         time12 = format24To12(time24),
                         isTomorrow = false
                     )
@@ -171,7 +185,7 @@ object PrayerTimeCalculator {
                 return NextPrayerInfo(
                     prayer = PrayerName.SUBUH,
                     triggerMillis = millis,
-                    time24 = subuh24.take(5),
+                    time24 = format24Short(subuh24),
                     time12 = format24To12(subuh24),
                     isTomorrow = true
                 )
@@ -180,7 +194,7 @@ object PrayerTimeCalculator {
 
         if (today != null) {
             val fallbackDate = try {
-                LocalDate.parse(today.dateIso).plusDays(1).toString()
+                LocalDate.parse(today.dateIso.trim()).plusDays(1).toString()
             } catch (_: Exception) {
                 LocalDate.now(zoneId).plusDays(1).toString()
             }
@@ -190,7 +204,7 @@ object PrayerTimeCalculator {
                 return NextPrayerInfo(
                     prayer = PrayerName.SUBUH,
                     triggerMillis = millis,
-                    time24 = subuh24.take(5),
+                    time24 = format24Short(subuh24),
                     time12 = format24To12(subuh24),
                     isTomorrow = true
                 )
