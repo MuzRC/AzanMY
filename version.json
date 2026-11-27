@@ -1,9 +1,9 @@
 {
-  "versionCode": 43,
-  "versionName": "1.0.43",
-  "latestVersion": "1.0.43",
-  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.43/AzanMY-v1.0.43-signed.apk",
-  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.43/AzanMY-v1.0.43-signed.apk",
-  "releaseNotes": "- Add files via upload\n- Add files via upload\n- Add files via upload\n- Add files via upload\n- Add files via upload\n- Add files via upload\n- chore: kemaskini version.json ke v1.0.36 (build 36) [skip ci]",
+  "versionCode": 45,
+  "versionName": "1.0.45",
+  "latestVersion": "1.0.45",
+  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.45/AzanMY-v1.0.45-signed.apk",
+  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.45/AzanMY-v1.0.45-signed.apk",
+  "releaseNotes": "- Add files via upload\n- chore: kemaskini version.json ke v1.0.43 (build 43) [skip ci]",
   "updatedAt": "2026-11-27"
 }
