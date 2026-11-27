@@ -1,9 +1,9 @@
 {
-  "versionCode": 31,
-  "versionName": "1.0.31",
-  "latestVersion": "1.0.31",
-  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.31/AzanMY-v1.0.31-signed.apk",
-  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.31/AzanMY-v1.0.31-signed.apk",
-  "releaseNotes": "- Enhance version.json update process with API fallback\n- Add files via upload\n- Update build_release.yml",
-  "updatedAt": "2026-11-26"
+  "versionCode": 36,
+  "versionName": "1.0.36",
+  "latestVersion": "1.0.36",
+  "apkUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.36/AzanMY-v1.0.36-signed.apk",
+  "downloadUrl": "https://github.com/MuzRC/AzanMY/releases/download/v1.0.36/AzanMY-v1.0.36-signed.apk",
+  "releaseNotes": "- Update PrayerModels.kt\n- Update AzanForegroundService.kt\n- Update AzanScheduler.kt\n- Revise README with app details and features\n- chore: kemaskini version.json ke v1.0.31 (build 31) [skip ci]",
+  "updatedAt": "2026-11-27"
 }
