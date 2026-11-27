@@ -39,9 +39,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,7 +59,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.musa.azanmy.BuildConfig
 import com.musa.azanmy.alarm.PrayerSyncWorker
-import com.musa.azanmy.data.AppReleaseInfo
 import com.musa.azanmy.data.AzanAudioCatalog
 import com.musa.azanmy.data.AzanAudioOption
 import com.musa.azanmy.data.JakimZoneData
@@ -71,6 +70,7 @@ import com.musa.azanmy.service.PrayerStatusNotification
 import com.musa.azanmy.util.AppUpdater
 import com.musa.azanmy.util.PermissionHelper
 import com.musa.azanmy.util.UpdateCheckResult
+import com.musa.azanmy.util.UpdateDownloadState
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,24 +89,46 @@ fun SettingsScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val playingRawName by AzanAudioPlayer.playingPreviewRawName.collectAsState()
+    val availableRelease by AppUpdater.availableRelease.collectAsState()
+    val downloadState by AppUpdater.downloadState.collectAsState()
+
     var permStatus by remember { mutableStateOf(PermissionHelper.checkAll(context)) }
     val zone = remember(settings.zoneCode) { JakimZoneData.findByCode(settings.zoneCode) }
 
     var isSyncing by remember { mutableStateOf(false) }
     var isCheckingUpdate by remember { mutableStateOf(false) }
-    var availableRelease by remember { mutableStateOf<AppReleaseInfo?>(null) }
-    var isDownloadingApk by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableIntStateOf(0) }
+
+    val isDownloadingApk = downloadState is UpdateDownloadState.Downloading
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 permStatus = PermissionHelper.checkAll(context)
+                if (PermissionHelper.canRequestPackageInstalls(context)) {
+                    AppUpdater.consumeAutoInstallIfReady(context)
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(downloadState) {
+        when (val state = downloadState) {
+            is UpdateDownloadState.ReadyToInstall -> {
+                if (!state.autoLaunchConsumed &&
+                    lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+                    PermissionHelper.canRequestPackageInstalls(context)
+                ) {
+                    AppUpdater.consumeAutoInstallIfReady(context)
+                }
+            }
+            is UpdateDownloadState.Error -> {
+                onShowMessage(state.message)
+            }
+            else -> Unit
         }
     }
 
@@ -573,11 +595,9 @@ fun SettingsScreen(
                                 isCheckingUpdate = true
                                 when (val result = AppUpdater.checkForUpdate()) {
                                     is UpdateCheckResult.UpdateAvailable -> {
-                                        availableRelease = result.info
                                         onShowMessage("Versi baharu v${result.info.versionName} tersedia!")
                                     }
                                     is UpdateCheckResult.UpToDate -> {
-                                        availableRelease = null
                                         onShowMessage("Anda sedang menggunakan versi terkini (v${result.currentVersionName}).")
                                     }
                                     is UpdateCheckResult.Error -> {
@@ -610,7 +630,12 @@ fun SettingsScreen(
                         )
                     }
 
-                    availableRelease?.let { release ->
+                    val displayRelease = availableRelease
+                        ?: (downloadState as? UpdateDownloadState.Downloading)?.releaseInfo
+                        ?: (downloadState as? UpdateDownloadState.ReadyToInstall)?.releaseInfo
+                        ?: (downloadState as? UpdateDownloadState.Error)?.releaseInfo
+
+                    displayRelease?.let { release ->
                         Surface(
                             shape = RoundedCornerShape(12.dp),
                             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -632,51 +657,109 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
 
-                                if (isDownloadingApk) {
-                                    LinearProgressIndicator(
-                                        progress = { downloadProgress / 100f },
-                                        color = BrightGold,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    Text(
-                                        text = "Memuat turun APK: $downloadProgress%",
-                                        fontSize = 12.sp,
-                                        color = ext.goldBright
-                                    )
-                                } else {
-                                    Button(
-                                        onClick = {
-                                            if (!PermissionHelper.canRequestPackageInstalls(context)) {
-                                                onShowMessage("Sila benarkan pemasangan aplikasi dari sumber ini dahulu.")
-                                                PermissionHelper.openInstallUnknownAppsSettings(context)
-                                                return@Button
-                                            }
-                                            scope.launch {
-                                                isDownloadingApk = true
-                                                downloadProgress = 0
-                                                val res = AppUpdater.downloadAndInstallApk(
-                                                    context = context,
-                                                    releaseInfo = release,
-                                                    onProgress = { pct -> downloadProgress = pct }
-                                                )
-                                                res.onFailure { err ->
-                                                    onShowMessage(err.message ?: "Muat turun gagal.")
-                                                }
-                                                isDownloadingApk = false
-                                            }
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = BrightGold,
-                                            contentColor = Color(0xFF1A1400)
-                                        ),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
+                                when (val dlState = downloadState) {
+                                    is UpdateDownloadState.Downloading -> {
+                                        if (dlState.totalBytes > 0L) {
+                                            LinearProgressIndicator(
+                                                progress = { dlState.progress / 100f },
+                                                color = BrightGold,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        } else {
+                                            LinearProgressIndicator(
+                                                color = BrightGold,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+
+                                        val progressLabel = if (dlState.totalBytes > 0L) {
+                                            "${dlState.statusMessage} ${dlState.progress}% • " +
+                                                "${AppUpdater.formatBytes(dlState.downloadedBytes)} / ${AppUpdater.formatBytes(dlState.totalBytes)}"
+                                        } else {
+                                            dlState.statusMessage
+                                        }
                                         Text(
-                                            text = "Muat Turun & Pasang Sekarang",
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp
+                                            text = progressLabel,
+                                            fontSize = 12.sp,
+                                            color = ext.goldBright,
+                                            fontWeight = FontWeight.SemiBold
                                         )
+                                        Text(
+                                            text = "Muat turun berjalan di latar belakang walaupun skrin padam.",
+                                            fontSize = 11.sp,
+                                            color = ext.subtleText
+                                        )
+                                        OutlinedButton(
+                                            onClick = { AppUpdater.cancelBackgroundDownload(context) },
+                                            border = BorderStroke(1.dp, ext.cardBorder),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "Batal Muat Turun",
+                                                fontSize = 12.sp,
+                                                color = ext.subtleText
+                                            )
+                                        }
+                                    }
+
+                                    is UpdateDownloadState.ReadyToInstall -> {
+                                        Text(
+                                            text = "Muat turun selesai. Fail APK sedia dipasang.",
+                                            fontSize = 12.sp,
+                                            color = ext.statusOk,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Button(
+                                            onClick = {
+                                                if (!PermissionHelper.canRequestPackageInstalls(context)) {
+                                                    onShowMessage("Sila benarkan pemasangan aplikasi dari sumber ini dahulu.")
+                                                    PermissionHelper.openInstallUnknownAppsSettings(context)
+                                                    return@Button
+                                                }
+                                                val ok = AppUpdater.installReadyApk(context)
+                                                if (!ok) {
+                                                    onShowMessage("Gagal membuka pemasang APK.")
+                                                }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = BrightGold,
+                                                contentColor = Color(0xFF1A1400)
+                                            ),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "Pasang Kemas Kini Sekarang",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
+
+                                    else -> {
+                                        Button(
+                                            onClick = {
+                                                if (!PermissionHelper.canRequestPackageInstalls(context)) {
+                                                    onShowMessage("Sila benarkan pemasangan aplikasi dari sumber ini dahulu.")
+                                                    PermissionHelper.openInstallUnknownAppsSettings(context)
+                                                    return@Button
+                                                }
+                                                AppUpdater.startBackgroundDownload(context, release)
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = BrightGold,
+                                                contentColor = Color(0xFF1A1400)
+                                            ),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "Muat Turun & Pasang Sekarang",
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
                                     }
                                 }
                             }
